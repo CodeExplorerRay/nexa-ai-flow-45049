@@ -65,8 +65,8 @@ const DailyOverview: React.FC = () => {
         <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
           <div className="text-center space-y-4">
             <h3 className="text-lg font-semibold text-gray-900">Focus Score</h3>
-            <div className="relative w-24 h-24 mx-auto">
-              <svg className="w-24 h-24 transform -rotate-90" viewBox="0 0 100 100">
+            <div className="relative w-full max-w-xs mx-auto">
+              <svg className="w-full h-auto transform -rotate-90" viewBox="0 0 100 100" aria-hidden="true">
                 <circle cx="50" cy="50" r="40" stroke="#e5e7eb" strokeWidth="8" fill="none" />
                 <circle 
                   cx="50" 

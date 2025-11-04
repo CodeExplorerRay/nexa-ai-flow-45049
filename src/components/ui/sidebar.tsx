@@ -36,6 +36,9 @@ type SidebarContext = {
 
 const SidebarContext = React.createContext<SidebarContext | null>(null)
 
+/**
+ * A hook to access the sidebar's context. Must be used within a `SidebarProvider`.
+ */
 function useSidebar() {
   const context = React.useContext(SidebarContext)
   if (!context) {
@@ -45,6 +48,13 @@ function useSidebar() {
   return context
 }
 
+/**
+ * Provides the sidebar context to its children.
+ * Manages the sidebar's state, including open/closed status for desktop and mobile,
+ * and persists the desktop state to a cookie.
+ * It also sets up a keyboard shortcut (Ctrl/Cmd + B) to toggle the sidebar.
+ * @param {boolean} [defaultOpen=true] - The default state of the sidebar on desktop.
+ */
 const SidebarProvider = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"div"> & {
@@ -154,6 +164,13 @@ const SidebarProvider = React.forwardRef<
 )
 SidebarProvider.displayName = "SidebarProvider"
 
+/**
+ * The main sidebar container.
+ * It renders as a Sheet component on mobile and a fixed-position div on desktop.
+ * It handles different variants (`sidebar`, `floating`, `inset`) and collapsible behaviors (`offcanvas`, `icon`).
+ * @param {'left' | 'right'} [side='left'] - The side of the screen the sidebar should appear on.
+ * @param {'sidebar' | 'floating' | 'inset'} [variant='sidebar'] - The visual style of the sidebar.
+ */
 const Sidebar = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"div"> & {
@@ -219,12 +236,13 @@ const Sidebar = React.forwardRef<
         data-variant={variant}
         data-side={side}
       >
-        {/* This is what handles the sidebar gap on desktop */}
+        {/* This div creates the space for the sidebar on the page, preventing content from flowing underneath it. */}
         <div
           className={cn(
             "duration-200 relative h-svh w-[--sidebar-width] bg-transparent transition-[width] ease-linear",
             "group-data-[collapsible=offcanvas]:w-0",
             "group-data-[side=right]:rotate-180",
+            // Adjust width for icon-only collapsed state based on variant
             variant === "floating" || variant === "inset"
               ? "group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)_+_theme(spacing.4))]"
               : "group-data-[collapsible=icon]:w-[--sidebar-width-icon]"
@@ -236,7 +254,7 @@ const Sidebar = React.forwardRef<
             side === "left"
               ? "left-0 group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)]"
               : "right-0 group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)]",
-            // Adjust the padding for floating and inset variants.
+            // Adjust padding and width for floating/inset variants in icon-only collapsed state.
             variant === "floating" || variant === "inset"
               ? "p-2 group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)_+_theme(spacing.4)_+2px)]"
               : "group-data-[collapsible=icon]:w-[--sidebar-width-icon] group-data-[side=left]:border-r group-data-[side=right]:border-l",
@@ -586,6 +604,16 @@ const SidebarMenuButton = React.forwardRef<
         />
       </Tooltip>
     )
+    if (state === "collapsed" && !isMobile) {
+      return (
+        <Tooltip>
+          <TooltipTrigger asChild>{button}</TooltipTrigger>
+          <TooltipContent side="right" align="center" {...tooltip} />
+        </Tooltip>
+      )
+    }
+
+    return button
   }
 )
 SidebarMenuButton.displayName = "SidebarMenuButton"

@@ -20,7 +20,7 @@ const BottomNavigation: React.FC<BottomNavigationProps> = ({ currentPath }) => {
   ];
 
   return (
-    <div className={`fixed bottom-0 w-full ${
+    <div role="navigation" aria-label="Mobile" className={`fixed bottom-0 w-full ${
       isMobile ? 'left-0' : 'left-1/2 transform -translate-x-1/2 max-w-md'
     } z-50`}>
       <div className="bg-white/95 backdrop-blur-md border-t border-gray-200 px-4 sm:px-6 py-3 safe-area-inset-bottom">
@@ -30,6 +30,9 @@ const BottomNavigation: React.FC<BottomNavigationProps> = ({ currentPath }) => {
             return (
               <button
                 key={item.path}
+                type="button"
+                aria-label={item.label}
+                aria-current={isActive ? 'page' : undefined}
                 onClick={() => navigate(item.path)}
                 className={`flex flex-col items-center space-y-1 py-2 px-2 sm:px-3 rounded-lg transition-all duration-200 touch-manipulation ${
                   isActive
@@ -37,7 +40,7 @@ const BottomNavigation: React.FC<BottomNavigationProps> = ({ currentPath }) => {
                     : 'text-gray-600 hover:text-gray-800 active:bg-gray-100'
                 }`}
               >
-                <item.icon className={`w-5 h-5 ${isActive ? 'scale-110' : ''} transition-transform`} />
+                <item.icon className={`w-5 h-5 icon ${isActive ? 'scale-110' : ''} transition-transform`} />
                 <span className="text-xs font-medium">{item.label}</span>
               </button>
             );

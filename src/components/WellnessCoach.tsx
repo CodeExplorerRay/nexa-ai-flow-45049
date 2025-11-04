@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Heart, Brain, Activity, Music, Wind, Stretch, Play, Pause } from 'lucide-react';
+import { Heart, Brain, Activity, Music, Wind, PersonStanding, Play, Pause } from 'lucide-react';
 
 interface WellnessActivity {
   id: string;
@@ -30,7 +30,7 @@ const WellnessCoach: React.FC = () => {
       duration: 3,
       type: 'stretch',
       description: 'Simple stretches to relieve tension',
-      icon: Stretch
+      icon: PersonStanding
     },
     {
       id: 'mindfulness',
