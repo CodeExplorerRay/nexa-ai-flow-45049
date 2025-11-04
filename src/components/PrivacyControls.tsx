@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { Shield, Lock, Eye, EyeOff, Server, Smartphone, Download, Trash2 } from 'lucide-react';
+import React, { useReducer } from 'react';
+import { Shield, Lock, Eye, EyeOff, Server, Smartphone, Download, Trash2, Wifi } from 'lucide-react';
 
 interface PrivacySetting {
   id: string;
@@ -10,8 +10,17 @@ interface PrivacySetting {
   category: 'processing' | 'storage' | 'sharing';
 }
 
-const PrivacyControls: React.FC = () => {
-  const [privacySettings, setPrivacySettings] = useState<PrivacySetting[]>([
+interface State {
+  privacySettings: PrivacySetting[];
+  dataRetention: string;
+}
+
+type Action =
+  | { type: 'TOGGLE_SETTING'; payload: { id: string } }
+  | { type: 'SET_DATA_RETENTION'; payload: { value: string } };
+
+const initialState: State = {
+  privacySettings: [
     {
       id: 'local-processing',
       title: 'Local AI Processing',
@@ -47,17 +56,28 @@ const PrivacyControls: React.FC = () => {
       enabled: false,
       category: 'storage'
     }
-  ]);
+  ],
+  dataRetention: '90-days',
+};
 
-  const [dataRetention, setDataRetention] = useState('90-days');
+function privacyReducer(state: State, action: Action): State {
+  switch (action.type) {
+    case 'TOGGLE_SETTING':
+      return {
+        ...state,
+        privacySettings: state.privacySettings.map(setting =>
+          setting.id === action.payload.id ? { ...setting, enabled: !setting.enabled } : setting
+        ),
+      };
+    case 'SET_DATA_RETENTION':
+      return { ...state, dataRetention: action.payload.value };
+    default:
+      return state;
+  }
+}
 
-  const toggleSetting = (id: string) => {
-    setPrivacySettings(prev =>
-      prev.map(setting =>
-        setting.id === id ? { ...setting, enabled: !setting.enabled } : setting
-      )
-    );
-  };
+const PrivacyControls: React.FC = () => {
+  const [state, dispatch] = useReducer(privacyReducer, initialState);
 
   const getCategoryIcon = (category: string) => {
     switch (category) {
@@ -123,7 +143,7 @@ const PrivacyControls: React.FC = () => {
         <h3 className="text-lg font-semibold text-gray-900 mb-6">Privacy Controls</h3>
         
         <div className="space-y-4">
-          {privacySettings.map((setting) => {
+          {state.privacySettings.map((setting) => {
             const IconComponent = getCategoryIcon(setting.category);
             return (
               <div 
@@ -141,7 +161,7 @@ const PrivacyControls: React.FC = () => {
                 </div>
                 
                 <button
-                  onClick={() => toggleSetting(setting.id)}
+                  onClick={() => dispatch({ type: 'TOGGLE_SETTING', payload: { id: setting.id } })}
                   className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
                     setting.enabled ? 'bg-blue-600' : 'bg-gray-200'
                   }`}
@@ -168,8 +188,8 @@ const PrivacyControls: React.FC = () => {
               Data Retention Period
             </label>
             <select
-              value={dataRetention}
-              onChange={(e) => setDataRetention(e.target.value)}
+              value={state.dataRetention}
+              onChange={(e) => dispatch({ type: 'SET_DATA_RETENTION', payload: { value: e.target.value } })}
               className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="30-days">30 days</option>

@@ -1,12 +1,18 @@
 
 import React, { useState } from 'react';
-import { Mic, Camera, Video, Save } from 'lucide-react';
+import { Mic, Camera, Video, Save, Loader2 } from 'lucide-react';
+import DOMPurify from 'dompurify';
 import { useIsMobile } from '../hooks/use-mobile';
+import { askQuestion, RagResponse } from '@/lib/rag';
+import AiAnswer from './AiAnswer';
 
 const EveningWrapUp: React.FC = () => {
   const isMobile = useIsMobile();
   const [journalText, setJournalText] = useState('');
   const [selectedMood, setSelectedMood] = useState('');
+  const [aiSuggestion, setAiSuggestion] = useState<RagResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const moodOptions = [
     { emoji: '🎉', label: 'Accomplished', value: 'accomplished' },
@@ -16,6 +22,30 @@ const EveningWrapUp: React.FC = () => {
     { emoji: '😤', label: 'Frustrated', value: 'frustrated' },
     { emoji: '🤔', label: 'Reflective', value: 'reflective' },
   ];
+
+  const handleJournalChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const sanitizedText = DOMPurify.sanitize(e.target.value);
+    setJournalText(sanitizedText);
+  };
+
+  const handleSaveAndSuggest = async () => {
+    if (!journalText.trim()) {
+      setError("Please write a journal entry before getting a suggestion.");
+      return;
+    }
+    setIsLoading(true);
+    setError(null);
+    setAiSuggestion(null);
+    try {
+      const prompt = `Based on my journal entry, what is one actionable suggestion for tomorrow? My journal: "${journalText}"`;
+      const response = await askQuestion(prompt);
+      setAiSuggestion(response);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to get AI suggestion.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const todayStats = {
     focusTime: { hours: 4, minutes: 32 },
@@ -88,15 +118,13 @@ const EveningWrapUp: React.FC = () => {
         <div className="space-y-4">
           <h3 className="text-lg font-medium text-gray-900">Journal Entry</h3>
           
-          {/* Text Input */}
           <textarea
             value={journalText}
-            onChange={(e) => setJournalText(e.target.value)}
+            onChange={handleJournalChange}
             placeholder="What went well today? What would you like to improve tomorrow?"
             className="w-full h-32 p-4 bg-white/50 border border-white/20 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
           
-          {/* Media Input Options */}
           <div className={`flex ${isMobile ? 'flex-col space-y-3' : 'space-x-4'}`}>
             <button className="flex items-center space-x-2 px-4 py-3 bg-white/50 rounded-xl hover:bg-white/70 transition-colors border border-white/20">
               <Mic className="w-5 h-5 text-blue-600" />
@@ -119,18 +147,30 @@ const EveningWrapUp: React.FC = () => {
       {/* AI Suggestion */}
       <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-200 animate-fade-in">
         <h3 className="text-lg font-semibold text-gray-900 mb-3">💡 AI Suggestion for Tomorrow</h3>
-        <p className="text-gray-700 mb-4">
-          Based on your focus patterns today, consider scheduling your most important work between 9-11 AM when you're most productive. 
-          Also, try adding a 15-minute stretch break at 3 PM to maintain energy levels.
-        </p>
-        <button className="text-blue-600 hover:text-blue-700 font-medium">Apply to Tomorrow's Agenda →</button>
+        {isLoading && (
+          <div className="flex items-center space-x-2 text-muted-foreground">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            <span>Generating suggestion...</span>
+          </div>
+        )}
+        {error && <p className="text-sm text-destructive">{error}</p>}
+        {aiSuggestion && <AiAnswer text={aiSuggestion.text} sources={aiSuggestion.sources} />}
+        {!isLoading && !aiSuggestion && (
+          <p className="text-gray-700 mb-4">
+            Save your journal entry to get a personalized suggestion for tomorrow.
+          </p>
+        )}
       </div>
 
       {/* Save Button */}
       <div className={`${isMobile ? 'fixed bottom-20 left-0 right-0 px-6' : ''}`}>
-        <button className="w-full flex items-center justify-center space-x-2 px-6 py-4 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-medium">
-          <Save className="w-5 h-5" />
-          <span>Save & Close Day</span>
+        <button 
+          onClick={handleSaveAndSuggest}
+          disabled={isLoading}
+          className="w-full flex items-center justify-center space-x-2 px-6 py-4 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-medium disabled:bg-blue-400 disabled:cursor-not-allowed"
+        >
+          {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
+          <span>{isLoading ? 'Generating...' : 'Save & Get Suggestion'}</span>
         </button>
       </div>
     </div>

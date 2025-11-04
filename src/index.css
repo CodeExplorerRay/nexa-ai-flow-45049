@@ -1,9 +1,42 @@
-
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
+@import "tailwindcss";
 @layer base {
+  /* Root typographic normalization to ensure rem-based sizes match design */
+  html {
+    font-size: 16px;
+    line-height: 1.5;
+  }
+
+  /* Responsive media defaults */
+  img, picture, video, iframe {
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  /* SVG default sizing and an .icon helper for consistent icon scale */
+  svg {
+    width: 1em;
+    height: 1em;
+    vertical-align: middle;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .icon {
+    width: 1.25em;
+    height: 1.25em;
+    display: inline-block;
+  }
+
+  /* Improved focus outline for accessibility */
+  :focus {
+    outline: none;
+  }
+
+  :focus-visible {
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.25);
+    border-radius: 6px;
+  }
+
   :root {
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
@@ -93,11 +126,13 @@
 
 @layer base {
   * {
-    @apply border-border;
+    /* Use CSS variable directly to avoid @apply ordering issues with Tailwind utilities */
+    border-color: hsl(var(--border));
   }
 
   body {
-    @apply bg-background text-foreground;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
     /* Prevent scroll bounce on iOS */
     overscroll-behavior-y: none;
     /* Smooth scrolling */

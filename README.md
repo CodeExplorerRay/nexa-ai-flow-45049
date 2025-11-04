@@ -1,73 +1,96 @@
-# Welcome to your Lovable project
+# nexa-ai-flow
 
-## Project info
+`nexa-ai-flow` is a modern, responsive AI-powered dashboard designed to provide a suite of personal productivity and wellness tools. It features a highly configurable interface, a full-stack RAG (Retrieval-Augmented Generation) pipeline, and a set of feature-rich components.
 
-**URL**: https://lovable.dev/projects/4e4ffef2-8697-4630-b498-edbac04987d3
+---
 
-## How can I edit this code?
+## 🚀 Tech Stack
 
-There are several ways of editing your application.
+-   **Frontend**: React 18+ with Vite, TypeScript, shadcn/ui, Tailwind CSS
+-   **Backend**: Node.js with Express, TypeScript
+-   **Embedding Service**: Python with FastAPI, Sentence-Transformers, FAISS
+-   **AI Model Runtime**: Ollama (llama3.2)
+-   **Testing**: Vitest, React Testing Library, Jest, Pytest
 
-**Use Lovable**
+## ⚙️ End-to-End Local Setup
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/4e4ffef2-8697-4630-b498-edbac04987d3) and start prompting.
+Follow these steps to get the entire application stack running locally.
 
-Changes made via Lovable will be committed automatically to this repo.
+### 1. Prerequisites
 
-**Use your preferred IDE**
+-   Node.js (v20.x or later)
+-   Python (v3.9 or later)
+-   Ollama installed and running.
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### 2. Install Ollama Model
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+Pull the required AI model for generation:
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+ollama pull llama3.2
+```
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+### 3. Setup Environment Variables
 
-# Step 3: Install the necessary dependencies.
-npm i
+Copy the example environment file and ensure the values are correct for your local setup.
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+```sh
+cp .env.example .env
+```
+
+### 4. Install Dependencies
+
+Install dependencies for all three services.
+
+```sh
+# Frontend
+npm install
+
+# Backend
+cd server
+npm install
+cd ..
+
+# Embedding Service
+cd embed_service
+pip install -r requirements.txt
+cd ..
+```
+
+### 5. Run the Services
+
+Open three separate terminals to run each part of the stack.
+
+**Terminal 1: Embedding Service**
+
+```sh
+cd embed_service
+uvicorn main:app --host 0.0.0.0 --port 8000
+```
+
+**Terminal 2: Backend Server**
+
+```sh
+cd server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+**Terminal 3: Frontend**
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```sh
+npm run dev
+```
 
-**Use GitHub Codespaces**
+The application will be available at `http://localhost:3000`.
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### 6. Index Sample Data
 
-## What technologies are used for this project?
+With the embedding service running, open a new terminal to index the sample documents. This provides the AI with context for answering questions.
 
-This project is built with:
+```sh
+chmod +x index_sample.sh
+./index_sample.sh
+```
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+You are now ready to use the full application! Try the "Evening Wrap-Up" feature to test the RAG pipeline.
 
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/4e4ffef2-8697-4630-b498-edbac04987d3) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)

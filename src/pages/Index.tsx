@@ -1,62 +1,61 @@
 
+/** @jsxImportSource react */
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
-import DailyOverview from '../components/DailyOverview';
-import TaskExtractor from '../components/TaskExtractor';
-import FocusMode from '../components/FocusMode';
-import EveningWrapUp from '../components/EveningWrapUp';
-import MultimodalSummarizer from '../components/MultimodalSummarizer';
-import SmartCalendar from '../components/SmartCalendar';
-import WellnessCoach from '../components/WellnessCoach';
-import PrivacyControls from '../components/PrivacyControls';
-import BottomNavigation from '../components/BottomNavigation';
+import { Outlet, useLocation } from 'react-router-dom';
 import WebHeader from '../components/WebHeader';
 import { useIsMobile } from '../hooks/use-mobile';
+import { Sidebar, SidebarProvider, SidebarTrigger, SidebarInset } from '@/components/ui/sidebar';
+import { Home, CheckSquare, Clock, Moon, Brain, Calendar, Heart, Shield } from 'lucide-react';
+import { SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar';
+import { useNavigate } from 'react-router-dom';
 
-const AppContent = () => {
-  const location = useLocation();
+const Index: React.FC = () => {
   const isMobile = useIsMobile();
-  
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-      {/* Web Header for desktop/tablet */}
-      {!isMobile && <WebHeader />}
-      
-      {/* Main Content */}
-      <div className={`${
-        isMobile 
-          ? 'w-full min-h-screen bg-white/80 backdrop-blur-sm shadow-xl' 
-          : 'max-w-7xl mx-auto px-6 py-8'
-      }`}>
-        <div className={`${
-          isMobile 
-            ? 'h-full' 
-            : 'bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl p-8 min-h-[calc(100vh-8rem)]'
-        }`}>
-          <Routes>
-            <Route path="/" element={<DailyOverview />} />
-            <Route path="/tasks" element={<TaskExtractor />} />
-            <Route path="/focus" element={<FocusMode />} />
-            <Route path="/evening" element={<EveningWrapUp />} />
-            <Route path="/summarizer" element={<MultimodalSummarizer />} />
-            <Route path="/calendar" element={<SmartCalendar />} />
-            <Route path="/wellness" element={<WellnessCoach />} />
-            <Route path="/privacy" element={<PrivacyControls />} />
-          </Routes>
-        </div>
-      </div>
-      
-      {/* Bottom Navigation - mobile only */}
-      {isMobile && <BottomNavigation currentPath={location.pathname} />}
-    </div>
-  );
-};
+  const navigate = useNavigate();
+  const location = useLocation();
 
-const Index = () => {
+  const navItems = [
+    { path: '/', icon: Home, label: 'Overview' },
+    { path: '/tasks', icon: CheckSquare, label: 'Tasks' },
+    { path: '/summarizer', icon: Brain, label: 'Summarizer' },
+    { path: '/calendar', icon: Calendar, label: 'Calendar' },
+    { path: '/focus', icon: Clock, label: 'Focus' },
+    { path: '/wellness', icon: Heart, label: 'Wellness' },
+    { path: '/evening', icon: Moon, label: 'Evening' },
+    { path: '/privacy', icon: Shield, label: 'Privacy' },
+  ];
+
   return (
-    <Router>
-      <AppContent />
-    </Router>
+    <SidebarProvider>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-violet-50 to-pink-50 dark:from-gray-900 dark:to-slate-900">
+        <Sidebar collapsible="icon">
+          <div className="flex items-center justify-center p-4 border-b border-gray-200/10">
+             {/* Placeholder for Logo */}
+             <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg" />
+          </div>
+          <SidebarMenu className="flex-1 p-2">
+            {navItems.map((item) => (
+              <SidebarMenuItem key={item.path}>
+                <SidebarMenuButton
+                  onClick={() => navigate(item.path)}
+                  isActive={location.pathname === item.path}
+                  tooltip={item.label}
+                >
+                  <item.icon />
+                  <span>{item.label}</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            ))}
+          </SidebarMenu>
+        </Sidebar>
+        <SidebarInset>
+          <WebHeader />
+          <main className="p-4 md:p-6 lg:p-8">
+            <Outlet />
+          </main>
+        </SidebarInset>
+      </div>
+    </SidebarProvider>
   );
 };
 

@@ -1,0 +1,57 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Use SQLite for local development by default. This avoids requiring a running
+// Postgres instance and the pgvector extension. For production you can switch
+// this back to postgresql and update `DATABASE_URL` in environment.
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Existing User model for Lucia auth
+model User {
+  id            String    @id
+  username      String    @unique
+  name          String?
+  email         String?   @unique
+  password_hash String?
+  github_id     String?   @unique
+  google_id     String?   @unique
+  sessions      Session[]
+  interactions  Interaction[] // Link to user interactions
+}
+
+model Session {
+  id        String   @id
+  userId    String
+  expiresAt DateTime
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// NEW: Model for storing source documents and their embeddings
+model Document {
+  id        Int      @id @default(autoincrement())
+  content   String
+  // Store embeddings and metadata as JSON-encoded strings for SQLite.
+  // For Postgres with pgvector you can change this back to an appropriate
+  // native type and enable the extension.
+  embedding String?
+  metadata  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// NEW: Model for collecting user interactions
+model Interaction {
+  id        Int      @id @default(autoincrement())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  prompt    String
+  response  String
+  createdAt DateTime @default(now())
+}
