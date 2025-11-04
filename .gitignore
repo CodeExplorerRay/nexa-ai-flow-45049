@@ -17,6 +17,14 @@ dist-ssr
 .env.*
 !.env.example
 !.env.ci
+!.env.test
+.env.production.local
+.env.development.local
+.env.staging.local
+.env.production
+.env.development
+.env.staging
+.env.example
 
 # Coverage reports
 /coverage
